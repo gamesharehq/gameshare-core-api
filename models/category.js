@@ -1,3 +1,4 @@
+'use strict';
 let mongoose = require('mongoose');
 let moment = require('moment');
 let Schema = mongoose.Schema;

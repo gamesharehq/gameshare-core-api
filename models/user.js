@@ -1,3 +1,4 @@
+'use strict';
 var mongoose = require('mongoose');
 var moment = require('moment');
 
@@ -10,7 +11,7 @@ var User = new Schema({
     phonenumber: { type: String, trim: true },
     address: { type: String, trim: true },
     status: {type: String, enum: ['Enabled', 'Disabled'], default: 'Enabled' },
-    photo: { type: String, trim: true },
+    avatar: { type: String, trim: true },
     reset_password: { type: Number, default: 0 },
     date_created: { type: Date, default: Date.now },
     date_modified: { type: Date, default: Date.now }
