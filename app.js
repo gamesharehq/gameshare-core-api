@@ -11,6 +11,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(require('express-validator')());
 
 //Routes
+app.use(require('./controllers/login'));
 app.use(require('./controllers/register'));
 
 // catch 404 and forward to error handler
