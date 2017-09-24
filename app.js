@@ -10,6 +10,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(require('express-validator')());
 
+//Routes
+app.use(require('./controllers/register'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -26,7 +28,12 @@ app.use(function(err, req, res, next) {
 
   // return the error response
   res.status(err.status || 500);
-  res.json({ error: err.message, status: err.status, trace: error.stack });
+  res.json(
+    { 
+      error: err.message, 
+      status: err.status || 500, 
+      trace: req.app.get('env') === 'development' ? err.stack : '' 
+    });
 });
 
 module.exports = app;
