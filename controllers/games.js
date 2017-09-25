@@ -43,9 +43,9 @@ function paginate(req, res, next) {
 
     async.parallel({
 
-        count: (cb) => Games.count({ status: 'Enabled' }).exec(cb),
+        count: (cb) => Games.count({ status: 'Enabled', moderated: true }).exec(cb),
         games: (cb) => {
-            Games.find({ status: 'Enabled' })
+            Games.find({ status: 'Enabled', moderated: true })
             .limit(perPage)
             .skip(perPage * page)
             .sort({ date_created: 'desc' })

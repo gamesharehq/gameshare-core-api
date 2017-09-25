@@ -12,6 +12,7 @@ let Games = new Schema({
     video: { type: String },
     description: { type: String },
     status: { type: String, enum: ['Enabled', 'Disabled'], default: 'Enabled'},
+    moderated: { type: String, enum: [true, false], default: false },
     mode: { type: String, enum: ['Sell', 'Exchange'], default: 'Exchange'},
     price: { type: Number, min: 1000, max: 15000 },
     date_created: { type: Date, default: Date.now},
