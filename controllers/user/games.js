@@ -9,9 +9,9 @@ router.get('/games', paginate);
 router.get('/games/:page(\\d+)', paginate);
 
 //create a game
-router.post('/games/create', (req, res, next) => {
+router.post('/game/create/:id?', (req, res, next) => {
     
-     debug('Game creation started by user: ' + req.userId);
+    debug('Game creation started by user: ' + req.userId);
 
     //run validation checks
     req.checkBody('title', 'Please provide a valid title').notEmpty();
@@ -66,11 +66,56 @@ router.post('/games/create', (req, res, next) => {
             else return next(new Error('Your must specify a price if you wish to sell a game'));
         }
 
-        //save the game.
-        game.save((err, game) => {
+        if(req.params.id){ //if id parameter is specified, it's an edit
+
+            //game._id = req.params.id;
+            Games.findOneAndUpdate({ _id: req.params.id, user: req.userId }, game, { new: true }, (err, game) => {
+                if(err) return next(err);
+
+                debug('User edited the game successfully');
+                return res.json(game);
+            });
+
+        }else{ //else is a new game being created
+
+            game.save((err, game) => {
+                if(err) return next(err);
+
+                debug('User created game successfully');
+                return res.json(game);
+            });
+        }
+
+    });
+
+});
+
+//update game status
+router.put('/game/status/:id', (req, res, next) => {
+    
+    debug('Game status update started by user: ' + req.userId);
+
+    //run validation checks
+    req.checkBody('status', 'Please specify a valid status').notEmpty().isIn(['Enabled', 'Disabled']);
+    req.sanitizeBody('status').escape(); //sanitize the input
+
+    //run the validation
+    req.getValidationResult()
+    .then((validation_result) => {
+
+        if(!validation_result.isEmpty()){ //there is error
+            
+            let error = new Error(validation_result.array({ onlyFirstError: true })[0].msg);
+            error.status = 400; //bad request
+
+            debug('Encountered validation error: ' + error.message);
+            return next(error);
+        }
+ 
+        Games.findOneAndUpdate({ _id: req.params.id, user: req.userId }, { status: req.body.status }, { new: true }, (err, game) => {
             if(err) return next(err);
 
-            debug('User created game successfully');
+            debug('User successfully updated the game status');
             return res.json(game);
         });
 
