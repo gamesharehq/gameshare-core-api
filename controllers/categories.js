@@ -9,6 +9,8 @@ router.get('/categories', (req, res, next) => {
 
     Categories.find({})
     .then((categories) => {
+
+        debug('Get all categories returned ' + categories.length + ' records');
         return res.json(categories);
 
     }).catch((err) => next(err));
