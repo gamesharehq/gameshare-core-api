@@ -27,8 +27,7 @@ router.get('/categories/:slug', (req, res, next) => {
         if(!category) next(); //send to 404
 
         Games.find({ category: category._id})
-        .populate('category', '_id, name, slug')
-        .populate('user', '_id, firstname, lastname, avatar, phonenumber')
+        .populate('user', '_id email firstname lastname avatar phonenumber')
         .exec((err, games) => {
             if(err) return next(err);
         

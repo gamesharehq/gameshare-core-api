@@ -21,8 +21,8 @@ router.get('/games/:id', (req, res, next) => {
         let _id = req.params.id;
 
         Games.findById(_id)
-        .populate('category', '_id, name, slug')
-        .populate('user', '_id, firstname, lastname, avatar, phonenumber')
+        .populate('category', '_id name slug description')
+        .populate('user', '_id email firstname lastname avatar phonenumber')
         .exec((err, game) => {
 
             if(err) return next(err);

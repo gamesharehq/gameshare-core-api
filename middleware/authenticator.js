@@ -10,9 +10,11 @@ module.exports = (req, res, next) => {
 
     jwt.verify(token, config.app_secret, (err, decoded_data) => {
         
-        if (err) return res.status(500).json({ authenticated: false, message: 'Failed to authenticate token.' });
+        if (err){
+            return res.status(500).json({ authenticated: false, message: 'Failed to authenticate token.' });
+        }
         
-        req.userId = decoded._id;
+        req.userId = decoded_data._id;
 
         // if everything good, save to request for use in other routes
         debug('Access token verified successfully!');

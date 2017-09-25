@@ -3,7 +3,7 @@ let debug = require('debug')('gameshare-core-api:games');
 let router = require('express').Router();
 let async = require('async');
 let mongoose = require('mongoose');
-let Games = require('../models/games');
+let Games = require('../../models/games');
 
 router.get('/games', paginate);
 router.get('/games/:page(\\d+)', paginate);
@@ -68,7 +68,7 @@ router.post('/game/create/:id?', (req, res, next) => {
 
         if(req.params.id){ //if id parameter is specified, it's an edit
 
-            //game._id = req.params.id;
+            game._id = req.params.id;
             Games.findOneAndUpdate({ _id: req.params.id, user: req.userId }, game, { new: true }, (err, game) => {
                 if(err) return next(err);
 
@@ -133,8 +133,8 @@ router.get('/games/:id', (req, res, next) => {
         let _id = req.params.id;
 
         Games.findOne({ _id: _id, user: req.userId })
-        .populate('category', '_id, name, slug')
-        .populate('user', '_id, firstname, lastname, avatar, phonenumber')
+        .populate('category', '_id name slug description')
+        .populate('user', '_id email firstname lastname avatar phonenumber')
         .exec((err, game) => {
 
             if(err) return next(err);
