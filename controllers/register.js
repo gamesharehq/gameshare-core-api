@@ -57,11 +57,16 @@ router.post('/register', (req, res, next) => {
             let _ = require('lodash');
             
             // create a token
-            user = _.pick(user, ['_id', 'email', 'firstname', 'lastname']);
-            var token = jwt.sign(user, config.app_secret, { expiresIn: config.token_expiration }); 
+            let token_data = _.pick(user, ['_id', 'email', 'firstname', 'lastname']);
+            var token = jwt.sign(token_data, config.app_secret, { expiresIn: config.token_expiration }); 
 
             debug('New user created successfully: token =' + token);
-            res.json({ authenticated: true, token: token });
+            token_data.phonenumber = user.phonenumber;
+            res.json({ 
+                authenticated: true, 
+                token: token,
+                user: token_data 
+            });
         });
 
     });

@@ -58,11 +58,13 @@ router.post('/login', (req, res, next) => {
             var token = jwt.sign(token_data, config.app_secret, { expiresIn: config.token_expiration }); 
 
             debug('User logged in: token =' + token);
+            debug('Fetching user account data');
 
+            token_data.phonenumber = user.phonenumber;
             let data = {
                 authenticated: true, 
                 token: token,
-                user: user
+                user: token_data
             };
             res.json(data);
 
