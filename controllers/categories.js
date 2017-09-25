@@ -22,13 +22,18 @@ router.get('/categories/:slug', (req, res, next) => {
     Categories.findOne({ slug: req.params.slug })
     .then((category) => {
 
+        if(!category) next(); //send to 404
+
         Games.find({ category: category._id})
         .populate('category', '_id, name, slug')
         .populate('user', '_id, firstname, lastname, avatar, phonenumber')
-        .exec((err, game) => {
+        .exec((err, games) => {
             if(err) return next(err);
         
-            res.json(game);
+            res.json({
+                category: category,
+                games: games
+            });
         });
     })
     .catch((err) => next(err));

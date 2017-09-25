@@ -2,6 +2,7 @@
 let debug = require('debug')('gameshare-core-api:games');
 let router = require('express').Router();
 let async = require('async');
+let mongoose = require('mongoose');
 let Games = require('../models/games');
 
 //Get all games
@@ -15,15 +16,24 @@ router.get('/games/:id', (req, res, next) => {
     
     req.sanitizeParams('id').escape();
 
-    let _id = req.params.id;
-    Games.findById(_id)
-    .populate('category', '_id, name, slug')
-    .populate('user', '_id, firstname, lastname, avatar, phonenumber')
-    .exec((err, game) => {
-       if(err) return next(err);
-       
-       res.json(game);
-    });
+    try{
+
+        let _id = req.params.id;
+
+        Games.findById(_id)
+        .populate('category', '_id, name, slug')
+        .populate('user', '_id, firstname, lastname, avatar, phonenumber')
+        .exec((err, game) => {
+
+            if(err) return next(err);
+            if(!game) return next(); //send to 404
+
+            return res.json(game);
+        });
+
+    }catch(err){ return next (new Error("Invalid data requested - Game not found")); }
+
+    
 });
 
 function paginate(req, res, next) {

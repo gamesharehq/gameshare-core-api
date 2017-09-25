@@ -10,11 +10,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(require('express-validator')());
 
-//Routes
+//Public Routes
 app.use(require('./controllers/login'));
 app.use(require('./controllers/register'));
 app.use(require('./controllers/games'));
 app.use(require('./controllers/categories'));
+
+//User Routes
+app.use(require('./middleware/authenticator'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
