@@ -1,6 +1,7 @@
 'use strict';
 let express = require('express');
 let bodyParser = require('body-parser');
+let debug = require('debug')('gameshare-core-api:app');
 
 require('./db');
 var app = express();
@@ -16,8 +17,11 @@ app.use(require('./controllers/register'));
 app.use(require('./controllers/games'));
 app.use(require('./controllers/categories'));
 
-//User Routes
+//Authentication Middleware - prevents access to user route without a valid token
 app.use(require('./middleware/authenticator'));
+
+//User Routes
+app.use('/user', require('./controllers/user/games'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -34,6 +38,10 @@ app.use(function(err, req, res, next) {
 
   // return the error response
   res.status(err.status || 500);
+
+  debug('Returning Error Response => ' + err.message );
+  debug('Error Stack => ' + err.stack);
+
   res.json(
     { 
       error: err.message, 
