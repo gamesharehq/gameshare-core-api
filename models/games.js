@@ -4,7 +4,7 @@ let moment = require('moment');
 let Schema = mongoose.Schema;
 
 let Games = new Schema({
-    title: { type: String, required: true },
+    title: { type: String, required: true, trim: true },
     release_year: { type: Date, required: true },
     category: { type: Schema.ObjectId, ref: 'Category', required: true },
     user: { type: Schema.ObjectId, ref: 'User', required: true },
