@@ -12,16 +12,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(require('express-validator')());
 
 //Public Routes
-app.use(require('./controllers/login'));
-app.use(require('./controllers/register'));
-app.use(require('./controllers/games'));
-app.use(require('./controllers/categories'));
+app.use('/api', require('./controllers/login'));
+app.use('/api',require('./controllers/register'));
+app.use('/api',require('./controllers/games'));
+app.use('/api',require('./controllers/categories'));
 
 //Authentication Middleware - prevents access to user route without a valid token
 app.use(require('./middleware/authenticator'));
 
 //User Routes
-app.use('/user', require('./controllers/user/games'));
+app.use('/api/user', require('./controllers/user/games'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
