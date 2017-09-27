@@ -15,7 +15,7 @@ app.use(require('express-validator')());
 app.use('/api', require('./controllers/login'));
 app.use('/api',require('./controllers/register'));
 app.use('/api',require('./controllers/games'));
-app.use('/api',require('./controllers/categories'));
+app.use('/',require('./controllers/categories'));
 
 //Authentication Middleware - prevents access to user route without a valid token
 app.use(require('./middleware/authenticator'));
