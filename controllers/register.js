@@ -52,7 +52,8 @@ router.post('/register', (req, res, next) => {
 
                 debug('New user could not be created: ' + err.message);
                 return next(err);
-            }else return next(err);
+                
+            }else if(err) return next(err);
 
             let _ = require('lodash');
             
