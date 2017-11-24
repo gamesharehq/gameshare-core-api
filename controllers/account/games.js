@@ -1,15 +1,12 @@
 'use strict';
 let debug = require('debug')('gameshare-core-api:games');
-let router = require('express').Router();
 let async = require('async');
 let mongoose = require('mongoose');
 let Games = require('../../models/games');
+let public_game_controller = require('../games');
 
-router.get('/games', paginate);
-router.get('/games/:page(\\d+)', paginate);
-
-//create a game
-router.post('/game/create/:id?', (req, res, next) => {
+//create a game (game/create/:id?)
+exports.create_game = (req, res, next) => {
     
     debug('Game creation started by user: ' + req.userId);
 
@@ -63,35 +60,33 @@ router.post('/game/create/:id?', (req, res, next) => {
 
         if(game.mode === 'Sell'){
             if(req.body.price) game.price = req.body.price;
-            else return next(new Error('Your must specify a price if you wish to sell a game'));
+            else{
+                let err = new Error('Your must specify a price if you wish to sell a game');
+                err.status = 400;
+                return next(err);
+            }
         }
 
+        let callback = (err) => {
+            if(err) return next(err);
+
+            //fetch all games
+            if(req.params.id) req.params.id = undefined; //to return all instead of one game for this user
+            return public_game_controller.get_all_or_one_game(req, res, next);
+        };
+
+        //save
         if(req.params.id){ //if id parameter is specified, it's an edit
-
             game._id = req.params.id;
-            Games.findOneAndUpdate({ _id: req.params.id, user: req.userId }, game, { new: true }, (err, game) => {
-                if(err) return next(err);
-
-                debug('User edited the game successfully');
-                return res.json(game);
-            });
-
-        }else{ //else is a new game being created
-
-            game.save((err, game) => {
-                if(err) return next(err);
-
-                debug('User created game successfully');
-                return res.json(game);
-            });
-        }
+            Games.findOneAndUpdate({ _id: req.params.id, user: req.userId }, game, callback);
+        }else game.save(callback);
 
     });
 
-});
+};
 
-//update game status
-router.put('/game/status/:id', (req, res, next) => {
+//update game status (/games/status/:id)
+exports.update_game_status = (req, res, next) => {
     
     debug('Game status update started by user: ' + req.userId);
 
@@ -116,67 +111,10 @@ router.put('/game/status/:id', (req, res, next) => {
             if(err) return next(err);
 
             debug('User successfully updated the game status');
-            return res.json(game);
+            return public_game_controller.get_all_or_one_game(req, res, next);
         });
 
     });
 
-});
+};
 
-//Get a particular game
-router.get('/games/:id', (req, res, next) => {
-    
-    req.sanitizeParams('id').escape();
-
-    try{
-
-        let _id = req.params.id;
-
-        Games.findOne({ _id: _id, user: req.userId })
-        .populate('category', '_id name slug description')
-        .populate('user', '_id email firstname lastname avatar phonenumber')
-        .exec((err, game) => {
-
-            if(err) return next(err);
-            if(!game) return next(); //send to 404
-
-            return res.json(game);
-        });
-
-    }catch(err){ return next (new Error("Invalid data requested - Game not found")); }
-
-    
-});
-
-function paginate(req, res, next) {
-        
-    let perPage = 20;
-    let page = (req.params.page ? req.params.page : 1) - 1;
-
-    async.parallel({
-
-        count: (cb) => Games.count({ user: req.userId }).exec(cb),
-        games: (cb) => {
-            Games.find({ user: req.userId })
-            .limit(perPage)
-            .skip(perPage * page)
-            .sort({ date_created: 'desc' })
-            .exec(cb)
-        }
-
-    }, function(err, result){
-
-        if(err) return next(err);
-
-        let data = {};
-        data.perPage = perPage;
-        data.count = result.count;
-        data.currentPage = parseInt(req.params.page ? req.params.page : '1');
-        data.games = result.games;
-
-        return res.json(data);
-    });
-        
-}
-
-module.exports = router;

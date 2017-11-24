@@ -1,24 +1,26 @@
 'use strict';
 let debug = require('debug')('gameshare-core-api:category');
-let router = require('express').Router();
 let Categories = require('../models/category');
 let Games = require('../models/games');
 
-//Get all categories
-router.get('/categories', (req, res, next) => {
+//GET all categories (or one category)
+exports.get_all_categories = (req, res, next) => {
 
-    Categories.find({})
+    let search = {};
+    if(req.params.id) search = {_id: req.params.id};
+
+    Categories.find(search)
     .then((categories) => {
 
         debug('Get all categories returned ' + categories.length + ' records');
         return res.json(categories);
 
     }).catch((err) => next(err));
-});
+};
 
-//Get all games in a category
-router.get('/categories/:slug', (req, res, next) => {
-    
+//Get all games in a category by slug
+exports.get_all_games_in_category = (req, res, next) => {
+     
     req.sanitizeParams('slug').escape();
 
     Categories.findOne({ slug: req.params.slug })
@@ -39,6 +41,4 @@ router.get('/categories/:slug', (req, res, next) => {
     })
     .catch((err) => next(err));
 
-});
-
-module.exports = router;
+};
