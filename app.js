@@ -1,11 +1,13 @@
 'use strict';
 let express = require('express');
+let morgan = require('morgan');
 let bodyParser = require('body-parser');
 let debug = require('debug')('gameshare-core-api:app');
 
 require('./db');
 var app = express();
 
+app.use(morgan('combined'));
 app.use(require('helmet')());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
