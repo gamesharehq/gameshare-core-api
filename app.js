@@ -58,10 +58,10 @@ app.use(function(err, req, res, next) {
   debug('Error Stack => ' + err.stack);
 
   res.json(
-    { 
-      error: err.message, 
-      status: err.status || 500, 
-      trace: req.app.get('env') === 'development' ? err.stack : '' 
+    {
+      error: err.message,
+      status: err.status || 500,
+      trace: req.app.get('env') === 'development' ? err.stack : ''
     });
 });
 
