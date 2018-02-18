@@ -28,7 +28,7 @@ exports.register_user_post = (req, res, next) => {
     req.getValidationResult().then((validation_result) => {
 
         if(!validation_result.isEmpty()){ //there is error
-            
+
             let error = new Error(validation_result.array({ onlyFirstError: true })[0].msg);
             error.status = 400; //bad request
 
@@ -49,33 +49,27 @@ exports.register_user_post = (req, res, next) => {
         let config = require('../config');
         user.save((err, user) => {
             if(err && err.code === 11000) {
-                
+
                 let util = require('../helpers/utilities');
                 err.message = util.get_duplicate_message(err);
 
                 debug('New user could not be created: ' + err.message);
                 return next(err);
-                
+
             }else if(err) return next(err);
 
             let _ = require('lodash');
-            
+
             // create a token
-            let user_data = _.pick(user, ['_id', 'email', 'firstname', 'lastname', 'phonenumber', 'address', 'status', 'avatar', 'is_admin']);
-            var token = jwt.sign(user_data, config.app_secret, { expiresIn: config.token_expiration }); 
+            let token_data = _.pick(user, ['_id', 'email', 'firstname', 'lastname']);
+            var token = jwt.sign(token_data, config.app_secret, { expiresIn: config.token_expiration });
 
             debug('New user created successfully: token =' + token);
-            user_data.datecreated = user.datecreated;
-
-            req.userId = user._id;
-            let game_data = gameHelper(req, res, next);
-            game_data.then((games) => {
-                res.json({ 
-                    authenticated: true, 
-                    token: token,
-                    user: user_data,
-                    games: games
-                });
+            token_data.phonenumber = user.phonenumber;
+            res.json({
+                authenticated: true,
+                token: token,
+                user: token_data
             });
             
         });

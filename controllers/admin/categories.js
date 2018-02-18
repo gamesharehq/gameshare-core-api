@@ -53,7 +53,5 @@ exports.creat_update_category = (req, res, next) => {
             Category.findByIdAndUpdate(req.params.id, newCategory, callback);
 
         }else newCategory.save(callback);
-
-        
     });
 };
