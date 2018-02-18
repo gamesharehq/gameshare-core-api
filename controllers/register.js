@@ -25,7 +25,7 @@ router.post('/register', (req, res, next) => {
     .then((validation_result) => {
 
         if(!validation_result.isEmpty()){ //there is error
-            
+
             let error = new Error(validation_result.array({ onlyFirstError: true })[0].msg);
             error.status = 400; //bad request
 
@@ -46,27 +46,27 @@ router.post('/register', (req, res, next) => {
         let config = require('../config');
         user.save((err, user) => {
             if(err && err.code === 11000) {
-                
+
                 let util = require('../helpers/utilities');
                 err.message = util.get_duplicate_message(err);
 
                 debug('New user could not be created: ' + err.message);
                 return next(err);
-                
+
             }else if(err) return next(err);
 
             let _ = require('lodash');
-            
+
             // create a token
             let token_data = _.pick(user, ['_id', 'email', 'firstname', 'lastname']);
-            var token = jwt.sign(token_data, config.app_secret, { expiresIn: config.token_expiration }); 
+            var token = jwt.sign(token_data, config.app_secret, { expiresIn: config.token_expiration });
 
             debug('New user created successfully: token =' + token);
             token_data.phonenumber = user.phonenumber;
-            res.json({ 
-                authenticated: true, 
+            res.json({
+                authenticated: true,
                 token: token,
-                user: token_data 
+                user: token_data
             });
         });
 
