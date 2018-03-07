@@ -1,5 +1,5 @@
 let router = require('express').Router();
-let controller = require('../controllers/login');
+let controller = require('../controllers/auth');
 
 //POST user login
 router.post('/login', controller.login);
