@@ -18,7 +18,7 @@ const existsAsync = promisify(redisClient.EXISTS).bind(redisClient);
 
 
 //generate a token and Save to redis store
-let generateTokenAndSave = (data) => {
+let generateToken = (data) => {
     var token = jwt.sign(data, config.app_secret);//no {expiresIn} option. - should happen on frontend/on redis when user logs out
     saveToken(token); //asynchronously save the Token to REDIS
 
@@ -32,36 +32,12 @@ let saveToken = (token) => {
             debug("Error Saving Token: " + err);
             return err;
         }
-
-        debug("OK, Saved Token: " + response);
-    });
-}
-
-//retriev a token from redis - useless because nothing valid is stored - tokens are keys in redis
-let getToken = (token) => {
-
-    getAsync(token).then((response) => {
-        debug("OK, Got Token: " + response);
-        return response;
-    })
-    .catch((err) => { 
-        debug("Error Retrieving Token: " + err);
-        return err; 
     });
 }
 
 //check is token is still in Redis
-let isValidToken = (token) => {
-
-    existsAsync(token).then((response) => {
-        debug("OK, isValidToken: " + response);
-        return response;
-
-    })
-    .catch((err) => { 
-        debug("Error checking Token exists: " + err);
-        return err; 
-    });
+let isValidToken = (token, callback) => {
+    redisClient.EXISTS(token, callback);
 }
 
 //when token expires/user logs out, remove token from redis store
@@ -79,6 +55,6 @@ let destroyToken = (token) => {
 module.exports = {
     generateToken,
     saveToken,
-    isValid,
+    isValidToken,
     destroyToken
 }

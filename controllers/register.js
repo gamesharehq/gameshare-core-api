@@ -2,9 +2,9 @@
 let debug = require('debug')('gameshare-core-api:register');
 let router = require('express').Router();
 let bcrypt = require('bcrypt');
-let jwt = require('jsonwebtoken');
 let User = require('../models/user');
-let gameHelper = require('../helpers/games');
+let session = require('../helpers/session');
+let _ = require('lodash');
 
 /* POST: register user */ 
 exports.register_user_post = (req, res, next) => {
@@ -46,7 +46,7 @@ exports.register_user_post = (req, res, next) => {
             password: hashedPassword
         });
 
-        let config = require('../config');
+        
         user.save((err, user) => {
             if(err && err.code === 11000) {
 
@@ -58,11 +58,9 @@ exports.register_user_post = (req, res, next) => {
 
             }else if(err) return next(err);
 
-            let _ = require('lodash');
-
             // create a token
             let token_data = _.pick(user, ['_id', 'email', 'firstname', 'lastname']);
-            var token = jwt.sign(token_data, config.app_secret, { expiresIn: config.token_expiration });
+            let token = session.generateToken(token_data); //generate JWT token and save to redis store
 
             debug('New user created successfully: token =' + token);
             token_data.phonenumber = user.phonenumber;

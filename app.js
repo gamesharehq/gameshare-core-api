@@ -3,7 +3,6 @@ let express = require('express');
 let morgan = require('morgan');
 let cors = require('cors');
 let bodyParser = require('body-parser');
-let morgan = require('morgan');
 let debug = require('debug')('gameshare-core-api:app');
 
 require('./db');
@@ -28,7 +27,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(require('express-validator')());
 
 //Public Routes
-app.use('/', require('./routes/login'));
+app.use('/', require('./routes/auth'));
 app.use('/', require('./routes/register'));
 app.use('/', require('./routes/games'));
 app.use('/', require('./routes/categories'));
@@ -37,7 +36,9 @@ app.use('/', require('./routes/categories'));
 app.use(require('./middleware/authenticator'));
 
 //User Routes
-app.use('/account', require('./routes/games'), require('./routes/account/games'));
+app.use('/account', 
+  require('./routes/games'), 
+  require('./routes/account/games'));
 
 //Authenticate if user is Admin before accessing admin routes
 app.use((req, res, next) => {
