@@ -2,17 +2,21 @@
 let debug = require('debug')('gameshare-core-api:register');
 let router = require('express').Router();
 let bcrypt = require('bcrypt');
-let jwt = require('jsonwebtoken');
 let User = require('../models/user');
+let session = require('../helpers/session');
+let _ = require('lodash');
 
-router.post('/register', (req, res, next) => {
+/* POST: register user */ 
+exports.register_user_post = (req, res, next) => {
+
+    debug("Payload => " + JSON.stringify(req.body));
 
     //run validation checks
     req.checkBody('email', 'Please provide a valid email').isEmail();
     req.checkBody('firstname', 'Your first name is required').isAlpha().notEmpty();
     req.checkBody('lastname', 'Your last name is required').isAlpha().notEmpty();
     req.checkBody('phonenumber', 'Phone number is not valid').notEmpty().isMobilePhone('en-NG');
-    req.checkBody('password', 'Password must exceed 7 characters in length').notEmpty().isLength({ min: 8 });
+    req.checkBody('password', 'Password must have at least 6 characters').notEmpty().isLength({ min: 6 });
 
     //sanitize the input
     req.sanitizeBody('email').escape();
@@ -21,8 +25,7 @@ router.post('/register', (req, res, next) => {
     req.sanitizeBody('phonenumber').escape();
     req.sanitizeBody('password').escape();
 
-    req.getValidationResult()
-    .then((validation_result) => {
+    req.getValidationResult().then((validation_result) => {
 
         if(!validation_result.isEmpty()){ //there is error
 
@@ -43,7 +46,7 @@ router.post('/register', (req, res, next) => {
             password: hashedPassword
         });
 
-        let config = require('../config');
+        
         user.save((err, user) => {
             if(err && err.code === 11000) {
 
@@ -55,11 +58,9 @@ router.post('/register', (req, res, next) => {
 
             }else if(err) return next(err);
 
-            let _ = require('lodash');
-
             // create a token
             let token_data = _.pick(user, ['_id', 'email', 'firstname', 'lastname']);
-            var token = jwt.sign(token_data, config.app_secret, { expiresIn: config.token_expiration });
+            let token = session.generateToken(token_data); //generate JWT token and save to redis store
 
             debug('New user created successfully: token =' + token);
             token_data.phonenumber = user.phonenumber;
@@ -68,9 +69,8 @@ router.post('/register', (req, res, next) => {
                 token: token,
                 user: token_data
             });
+            
         });
 
     });
-});
-
-module.exports = router;
+};

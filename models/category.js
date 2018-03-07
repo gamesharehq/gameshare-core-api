@@ -5,7 +5,7 @@ let Schema = mongoose.Schema;
 
 let Category = new Schema({
     name: { type: String, required: true},
-    slug: { type: String, unique: true},
+    slug: { type: String, unique: true, trim: true, lowercase: true},
     status: { type: String, enum: ['Enabled', 'Disabled'], default: 'Enabled'},
     description: { type: String, trim: true},
     date_created: { type: Date, default: Date.now},

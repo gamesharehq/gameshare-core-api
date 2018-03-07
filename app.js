@@ -27,16 +27,31 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(require('express-validator')());
 
 //Public Routes
-app.use('/', require('./controllers/login'));
-app.use('/', require('./controllers/register'));
-app.use('/', require('./controllers/games'));
-app.use('/', require('./controllers/categories'));
+app.use('/', require('./routes/auth'));
+app.use('/', require('./routes/register'));
+app.use('/', require('./routes/games'));
+app.use('/', require('./routes/categories'));
 
 //Authentication Middleware - prevents access to user route without a valid token
 app.use(require('./middleware/authenticator'));
 
 //User Routes
-app.use('/user', require('./controllers/user/games'));
+app.use('/account', 
+  require('./routes/games'), 
+  require('./routes/account/games'));
+
+//Authenticate if user is Admin before accessing admin routes
+app.use((req, res, next) => {
+    if(!req.userIsAdmin){
+      let err = new Error("Invalid Admin Token")
+      err.status = 401; err.stack = '';
+      next(err);
+    }else next();
+});
+
+//Admin Routes
+app.use('/admin', require('./routes/admin/categories'));
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
