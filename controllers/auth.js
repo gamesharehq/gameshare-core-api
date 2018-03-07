@@ -4,11 +4,28 @@ let bcrypt = require('bcrypt');
 let jwt = require('jsonwebtoken');
 let stringify = require('json-stringify-safe');
 let gameHelper = require('../helpers/games');
+let session = require('../helpers/session');
 let User = require('../models/user');
 let config = require('../config');
 
+/* GET: perform user logout */
+/* ROUTE: /auth/logout */
+exports.logout = (req, res, next) => {
+    debug("User is logging out");
+
+    if(!req.userToken){
+        return res.json();
+    }
+
+    debug("User token is " + req.userToken);
+    session.destroyToken(req.userToken);
+    
+    return res.json();
+}
+
 /* POST: perform user login */
-exports.login_post = (req, res, next) => {
+/* ROUTE: /auth/login */
+exports.login = (req, res, next) => {
     
     //validate posted info
     req.checkBody('email', 'Please provide a valid email').isEmail();
